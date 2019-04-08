@@ -2,8 +2,8 @@
 Simple and easy GUI for creating wifi hotspots on Linux.
 
 # Coming soon
--Configuration entirely via GUI
--More detailed error messages
+1.Configuration entirely via GUI
+2.More detailed error messages
 
 # Requirements
 1. create_ap (Download and install from https://github.com/oblique/create_ap)
