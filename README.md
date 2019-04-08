@@ -20,6 +20,7 @@ It does not work. You need to use opensource drivers to be able to use the app.
 # Hardware support
 WiFi board need to support AP-mode.
 Check running the following command on terminal:
+
 $ iw list | grep AP
 
 # Installation instructions
@@ -34,18 +35,18 @@ Before being used it is necessary to adjust a few settings. For now, editing man
 ## WIFI_INTERFACE=wlp2s0
 Replace wlp2s0 with the desired wifi network interface to transmit the hotspot signal.
 Check the ones available using the following command on terminal:
+
 $ ifconfig
 
 ## INTERNET_NETWORK_INTERFACE=enp3s0
 Network interface that is connected to the internet. Usually enp3s0 for land connections and wlp2s0 for wifi boards.
 NOTE: It can be the set the same as the WIFI_INTERFACE in case you want to share your wifi connection with a different ssid and password (only if 2.4Ghz wifi connection. It does not usually work for 5Ghz connections).
 Check yours settings at:
+
 $ ifconfig
 
 ## PASSWORD
 The default is set to "ezHotspot"
-
-# Screenshots
 
 ## License
 
