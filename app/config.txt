@@ -1,0 +1,4 @@
+wlp2s0
+wlp2s0
+ezWiFiHotspot
+12345678

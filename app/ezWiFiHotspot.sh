@@ -17,15 +17,6 @@
 
 #ezWiFiHotspot - https://github.com/raryelcostasouza/ezWiFiHotspot
 
-#SETTINGS SECTION ------------------------------------------------
-WIFI_INTERFACE=wlp2s0
-PASSWORD=ezHotspot
-
-#network interface that is connected to the internet
-INTERNET_NETWORK_INTERFACE=enp3s0
-
-#END OF SETTINGS SECTION ------------------------------------------------
-
 function check_hotspot_status
 {
     WAIT_TIME=$1
@@ -33,7 +24,6 @@ function check_hotspot_status
 
     sleep $WAIT_TIME | zenity --progress --pulsate --auto-close --text="$OPERATION hotspot..."
     AP0_INTERFACE=$(ifconfig | grep ap0)
-
 
     #if the hotspot is active the string will be not empty
     if [ -z "$AP0_INTERFACE" ]
@@ -47,19 +37,18 @@ function check_hotspot_status
 
 function start_hotspot
 {
-	SSID=`hostname`"-HOTSPOT"
-
 	#retrieve the first parameter given to the function
-	WIFI_INTERFACE=$1
-  INTERNET_NETWORK_INTERFACE=$2
-  PASSWORD=$3
+  INTERNET_NETWORK_INTERFACE=$1
+  WIFI_INTERFACE=$2
+  SSID=$3
+  PASSWORD=$4
 
 	create_ap $WIFI_INTERFACE $INTERNET_NETWORK_INTERFACE $SSID $PASSWORD > /dev/null&
 
-	if [ "$(check_hotspot_status 5 "Starting")" = "on" ]
+	if [ "$(check_hotspot_status 10 "Starting")" = "on" ]
 	then
         #if the hotspot was successfully started
-        zenity --info --title="Hotspot Started" --text="Hotspot Started\n\nConnection Info:\n\nSSID: $SSID\n\nPassword: $PASSWORD"
+        zenity --info --no-wrap --title="Hotspot Started" --text="Hotspot Started\n\nConnection Info:\n\nSSID: $SSID\n\nPassword: $PASSWORD"
     else
         #if there was a problem to start the hotspot
         zenity --error --title="Hotspot Error" --text="Unable to start hotspot. Please contact the admin."
@@ -79,31 +68,39 @@ function stop_hotspot
     fi
 }
 
-#retrieve the first parameter passed to the script
-WIFI_INTERFACE_EXISTS=$(ifconfig | grep $WIFI_INTERFACE)
+function errorMessage
+{
+    MESSAGE=$1
+    zenity --error --title="Error" --no-wrap --text="$1"
+}
+#Load settings from config file
+INTERNET_NETWORK_INTERFACE=$(sed -n 1p config.txt)
+WIFI_INTERFACE=$(sed -n 2p config.txt)
+SSID=$(sed -n 3p config.txt)
+PASSWORD=$(sed -n 4p config.txt)
 
-#if the wifi interface parameter is missing or invalid
-if [ -z "$WIFI_INTERFACE_EXISTS" ]
+if [ -f "config.txt" ]
 then
-    zenity --error --title="Invalid Parameter" --text="Invalid Wifi interface: $WIFI_INTERFACE.\n\nPlease provide a valid wifi interface as a parameter to the script."
-else
-    #if the wifi interface is valid
-    #if the variable hotspot_network_interface is empty means that the hotspot is currently not running
-    if [ "$(check_hotspot_status 0 "Nothing")" = "off" ]
-    then
-        #hotspot not running... so start it
-        start_hotspot $WIFI_INTERFACE $INTERNET_NETWORK_INTERFACE $PASSWORD
-    else
-        #hotspot running... ask what to do... restart or stop?
-        zenity --question --title="Hotspot already running" --text="The hotspot is currently running.\n\What would you like to do?" --ok-label="Restart Hotspot" --cancel-label="Stop Hotspot"
 
-        #if the user selected the yes option (Restart hotspot)
-        if [ "$?" = "0" ]; then
-            create_ap --stop ap0
-            start_hotspot $WIFI_INTERFACE $INTERNET_NETWORK_INTERFACE $PASSWORD
-        else
-            #just stop it
-            stop_hotspot
-        fi
-    fi
+  #if the variable hotspot_network_interface is empty means that the hotspot is currently not running
+  if [ "$(check_hotspot_status 0 "Nothing")" = "off" ]
+  then
+      #hotspot not running... so start it
+      start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
+  else
+      #hotspot running... ask what to do... restart or stop?
+      zenity --question --no-wrap --title="Hotspot already running" --text="The hotspot is currently running.\n\What would you like to do?" --ok-label="Restart Hotspot" --cancel-label="Stop Hotspot"
+
+      #if the user selected the yes option (Restart hotspot)
+      if [ "$?" = "0" ]; then
+          create_ap --stop ap0
+          start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
+      else
+          #just stop it
+          stop_hotspot
+      fi
+  fi
+
+else
+    errorMessage "NOT CONFIGURED"
 fi
