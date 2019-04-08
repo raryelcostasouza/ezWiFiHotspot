@@ -31,18 +31,18 @@ Note: to enable non-admin users to create the wifi hotspot, by default, during t
 
 Before being used it is necessary to adjust a few settings. For now, editing manually the file /opt/ezWiFiHotspot/ezWiFiHotspot.sh
 
-1) WIFI_INTERFACE=wlp2s0
+## WIFI_INTERFACE=wlp2s0
 Replace wlp2s0 with the desired wifi network interface to transmit the hotspot signal.
 Check the ones available using the following command on terminal:
 $ ifconfig
 
-2) INTERNET_NETWORK_INTERFACE=enp3s0
+## INTERNET_NETWORK_INTERFACE=enp3s0
 Network interface that is connected to the internet. Usually enp3s0 for land connections and wlp2s0 for wifi boards.
 NOTE: It can be the set the same as the WIFI_INTERFACE in case you want to share your wifi connection with a different ssid and password (only if 2.4Ghz wifi connection. It does not usually work for 5Ghz connections).
 Check yours settings at:
 $ ifconfig
 
-3) PASSWORD
+## PASSWORD
 The default is set to "ezHotspot"
 
 # Screenshots
