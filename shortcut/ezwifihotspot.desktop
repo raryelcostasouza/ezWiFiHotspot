@@ -1,0 +1,12 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Type=Application
+Categories=Network;
+Terminal=false
+Icon[en_US]=/opt/ezWiFiHotspot/hotspot.svg
+Name[en_US]=ezWiFiHotspot
+Exec=bash -c "sudo /opt/ezWiFiHotspot/ezWiFiHotspot.sh"
+Name=ezWiFiHotspot
+Icon=/opt/ezWiFiHotspot/hotspot.svg
