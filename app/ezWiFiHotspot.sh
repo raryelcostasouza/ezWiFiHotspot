@@ -132,22 +132,26 @@ function runAction
     ACTION_SELECTED=$1
     CONFIG_FILE=$2
 
-    if [ $ACTION_SELECTED = "Start wifi hotspot" ]
-    then
-        #Load settings from config file
-        INTERNET_NETWORK_INTERFACE=$(sed -n 1p $CONFIG_FILE)
-        WIFI_INTERFACE=$(sed -n 2p $CONFIG_FILE)
-        SSID=$(sed -n 3p $CONFIG_FILE)
-        PASSWORD=$(sed -n 4p $CONFIG_FILE)
+    case $ACTION_SELECTED in
+        "Start wifi hotspot" )
+            #Load settings from config file
+            INTERNET_NETWORK_INTERFACE=$(sed -n 1p $CONFIG_FILE)
+            WIFI_INTERFACE=$(sed -n 2p $CONFIG_FILE)
+            SSID=$(sed -n 3p $CONFIG_FILE)
+            PASSWORD=$(sed -n 4p $CONFIG_FILE)
 
-        start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
-    elif [ $ACTION_SELECTED = "Stop wifi hotspot" ]
-    then
-        stop_hotspot
-    elif [ $ACTION_SELECTED = "Change settings" ]
-    then
-        $(sudo /opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
-    fi
+            start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
+        ;;
+
+        "Stop wifi hotspot" )
+            stop_hotspot
+        ;;
+
+        "Change settings")
+            $(sudo /opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
+        ;;
+
+    esac
 }
 
 
