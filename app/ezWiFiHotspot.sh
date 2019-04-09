@@ -17,7 +17,8 @@
 
 #ezWiFiHotspot - https://github.com/raryelcostasouza/ezWiFiHotspot
 
-CONFIG_FILE="/opt/ezWiFiHotspot/config.txt"
+CONFIG_FILE="$HOME/.ezWiFiHotspot/config.txt"
+CONFIG_FOLDER="$HOME/.ezWiFiHotspot"
 TMP_STATUS_HOTSPOT="/tmp/ezWiFiHotspot-status.txt"
 TMP_OUTPUT_CREATE_AP="/tmp/output_create_ap.txt"
 TMP_RESULT_CREATE_AP="/tmp/result_create_ap"
@@ -189,7 +190,7 @@ function checkConfigFileEmpty
         #run the configuration interface
         zenity --info --title="ezWiFiHotspot - First run" \
                             --no-wrap --text="Press OK and follow the steps to set the network interfaces, ssid and password for your wifi hotspot."
-        $(sudo /opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
+        $(/opt/ezWiFiHotspot/config.sh $CONFIG_FILE $CONFIG_FOLDER)
     fi
 }
 
@@ -236,7 +237,7 @@ function runAction
         ;;
 
         "Settings")
-            $(sudo /opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
+            $(/opt/ezWiFiHotspot/config.sh $CONFIG_FILE $CONFIG_FOLDER)
         ;;
 
     esac
