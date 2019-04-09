@@ -15,7 +15,7 @@ function windowSelectNetworkInterface
   TABLE_SELECTION=$(cat $TMP_LIST)
   INTERFACE_SELECTED=$(zenity --list --radiolist --title="$TITLE" \
                       --text="$MSG" \
-                      --column='' --column="iNetwork Interfaces" \
+                      --column='' --column="Network Interfaces" \
                       --width=500 --height=250 \
                       $TABLE_SELECTION)
   echo $INTERFACE_SELECTED
