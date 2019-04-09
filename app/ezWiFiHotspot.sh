@@ -18,6 +18,7 @@
 #ezWiFiHotspot - https://github.com/raryelcostasouza/ezWiFiHotspot
 
 CONFIG_FILE="/opt/ezWiFiHotspot/config.txt"
+
 function check_hotspot_status
 {
     WAIT_TIME=$1
@@ -39,12 +40,12 @@ function check_hotspot_status
 function start_hotspot
 {
 	#retrieve the first parameter given to the function
-  INTERNET_NETWORK_INTERFACE=$1
-  WIFI_INTERFACE=$2
-  SSID=$3
-  PASSWORD=$4
+    INTERNET_NETWORK_INTERFACE=$1
+    WIFI_INTERFACE=$2
+    SSID=$3
+    PASSWORD=$4
 
-	create_ap $WIFI_INTERFACE $INTERNET_NETWORK_INTERFACE $SSID $PASSWORD > /dev/null&
+	create_ap $WIFI_INTERFACE $INTERNET_NETWORK_INTERFACE $SSID $PASSWORD &> /tmp/log_create_ap
 
 	if [ "$(check_hotspot_status 10 "Starting")" = "on" ]
 	then
@@ -86,11 +87,6 @@ function errorMessage
     MESSAGE=$1
     zenity --error --title="Error" --no-wrap --text="$1"
 }
-#Load settings from config file
-INTERNET_NETWORK_INTERFACE=$(sed -n 1p config.txt)
-WIFI_INTERFACE=$(sed -n 2p config.txt)
-SSID=$(sed -n 3p config.txt)
-PASSWORD=$(sed -n 4p config.txt)
 
 
 checkSupportAPMode
@@ -103,24 +99,24 @@ then
     SSID=$(sed -n 3p $CONFIG_FILE)
     PASSWORD=$(sed -n 4p $CONFIG_FILE)
 
-  #if the variable hotspot_network_interface is empty means that the hotspot is currently not running
-  if [ "$(check_hotspot_status 0 "Nothing")" = "off" ]
-  then
-      #hotspot not running... so start it
-      start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
-  else
-      #hotspot running... ask what to do... restart or stop?
-      zenity --question --no-wrap --title="Hotspot already running" --text="The hotspot is currently running.\n\What would you like to do?" --ok-label="Restart Hotspot" --cancel-label="Stop Hotspot"
+    #if the variable hotspot_network_interface is empty means that the hotspot is currently not running
+    if [ "$(check_hotspot_status 0 "Nothing")" = "off" ]
+    then
+        #hotspot not running... so start it
+        start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
+    else
+        #hotspot running... ask what to do... restart or stop?
+        zenity --question --no-wrap --title="Hotspot already running" --text="The hotspot is currently running.\n\What would you like to do?" --ok-label="Restart Hotspot" --cancel-label="Stop Hotspot"
 
-      #if the user selected the yes option (Restart hotspot)
-      if [ "$?" = "0" ]; then
-          create_ap --stop ap0
-          start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
-      else
-          #just stop it
-          stop_hotspot
-      fi
-  fi
+        #if the user selected the yes option (Restart hotspot)
+        if [ "$?" = "0" ]; then
+            create_ap --stop ap0
+            start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
+        else
+            #just stop it
+            stop_hotspot
+        fi
+    fi
 
 else
     #run the configuration interface
