@@ -82,6 +82,8 @@ function checkSupportAPMode
     fi
 }
 
+
+
 function errorMessage
 {
     MESSAGE=$1
@@ -109,12 +111,12 @@ function windowMain
 
     if [ "$HOTSPOT_STATUS" = "on" ]
     then
-        MSG="Status: Hotspot stopped"
-        OPTIONS="TRUE" "Stop wifi hotspot"
-    else
         MSG="Status: Hotspot running"
+        OPTIONS=("TRUE" "Stop wifi hotspot")
+    else
+        MSG="Status: Hotspot stopped"
         OPTIONS=("TRUE" "Start wifi hotspot")
-        #OPTION2="FALSE" "Change settings"
+        OPTIONS+=("FALSE" "Change settings")
     fi
 
     #if hotspot running show only option stop
@@ -123,7 +125,7 @@ function windowMain
                         --text="$MSG\nWhat would you like to do?\n" \
                         --column='' --column="Actions" \
                         --width=500 --height=300 \
-                        $OPTIONS)
+                        "${OPTIONS[@]}")
     echo $ACTION_SELECTED
 }
 
