@@ -17,6 +17,7 @@
 
 #ezWiFiHotspot - https://github.com/raryelcostasouza/ezWiFiHotspot
 
+CONFIG_FILE="/opt/ezWiFiHotspot/config.txt"
 function check_hotspot_status
 {
     WAIT_TIME=$1
@@ -93,7 +94,14 @@ PASSWORD=$(sed -n 4p config.txt)
 
 
 checkSupportAPMode
+#if no configuration file exists
+if [ -f $CONFIG_FILE ]
 then
+    #Load settings from config file
+    INTERNET_NETWORK_INTERFACE=$(sed -n 1p $CONFIG_FILE)
+    WIFI_INTERFACE=$(sed -n 2p $CONFIG_FILE)
+    SSID=$(sed -n 3p $CONFIG_FILE)
+    PASSWORD=$(sed -n 4p $CONFIG_FILE)
 
   #if the variable hotspot_network_interface is empty means that the hotspot is currently not running
   if [ "$(check_hotspot_status 0 "Nothing")" = "off" ]
