@@ -1,5 +1,10 @@
 TMP_LIST="/tmp/list_network_interfaces.txt"
 
+function clearTMPFiles
+{
+    rm -rf $TMP_LIST
+}
+
 function errorMessage
 {
     MESSAGE=$1
@@ -16,7 +21,7 @@ function windowSelectNetworkInterface
   INTERFACE_SELECTED=$(zenity --list --radiolist --title="$TITLE" \
                       --text="$MSG" \
                       --column='' --column="Network Interfaces" \
-                      --width=500 --height=250 \
+                      --width=500 --height=400 \
                       $TABLE_SELECTION)
   echo $INTERFACE_SELECTED
 }
@@ -44,7 +49,6 @@ function generateRadioList
     TMP_LIST=$1
     LIST_INTERFACES=$2
 
-    rm -rf $TMP_LIST
     for INTERFACE in $LIST_INTERFACES
     do
       echo "FALSE $INTERFACE" >> $TMP_LIST
@@ -85,6 +89,7 @@ function windowCreateWiFiPassword
     echo $PASSWORD
 }
 
+clearTMPFiles
 INTERNET_INTERFACE=$(windowSelectInternetNetworkInterface $TMP_LIST)
 WIFI_INTERFACE=$(windowSelectWiFiNetworkInterface $TMP_LIST)
 SSID=$(windowCreateSSID)
@@ -96,3 +101,4 @@ echo $INTERNET_INTERFACE > $CONFIG_FILE
 echo $WIFI_INTERFACE >> $CONFIG_FILE
 echo $SSID >> $CONFIG_FILE
 echo $PASSWORD >> $CONFIG_FILE
+clearTMPFiles
