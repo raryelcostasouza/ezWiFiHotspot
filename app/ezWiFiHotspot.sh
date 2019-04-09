@@ -18,24 +18,77 @@
 #ezWiFiHotspot - https://github.com/raryelcostasouza/ezWiFiHotspot
 
 CONFIG_FILE="/opt/ezWiFiHotspot/config.txt"
+TMP_STATUS_HOTSPOT="/tmp/ezWiFiHotspot-status.txt"
+TMP_OUTPUT_CREATE_AP="/tmp/output_create_ap.txt"
+TMP_RESULT_CREATE_AP="/tmp/result_create_ap"
 
-function check_hotspot_status
+function errorMessage
 {
-    WAIT_TIME=$1
-    OPERATION=$2
-
-    sleep $WAIT_TIME | zenity --progress --pulsate --auto-close --text="$OPERATION hotspot..."
-    AP0_INTERFACE=$(ifconfig | grep ap0)
-
-    #if the hotspot is active the string will be not empty
-    if [ -z "$AP0_INTERFACE" ]
-    then
-        echo "off"
-    else
-        echo "on"
-    fi
+    MESSAGE=$1
+    zenity --error --title="Error" --no-wrap --text="$1"
 }
 
+function errorMessageDependency
+{
+    DEPENDENCY_NAME=$1
+    PACKAGE_NAME=$2
+
+    errorMessage "Missing Dependency '$DEPENDENCY_NAME'. Please install it before using this app.
+    \n\nOn Ubuntu: sudo apt install $PACKAGE_NAME"
+}
+
+function clearTMPFiles
+{
+    rm -rf $TMP_STATUS_HOTSPOT
+    rm -rf $TMP_OUTPUT_CREATE_AP
+    rm -rf $TMP_RESULT_CREATE_AP
+}
+
+function isHotspotRunning
+{
+    $(create_ap --list-running | grep -q "(ap"; echo $? > $TMP_STATUS_HOTSPOT) | zenity --progress --pulsate --auto-close --text="Checking hotspot status..."
+    echo $(cat $TMP_STATUS_HOTSPOT)
+}
+
+function loopCheckOutputCreateAP
+{
+    #check the output of create_ap for relevant information
+    #until get an error or success
+    #wait 0.5s between each check on the output file
+    STOP="1"
+    while [ $STOP = "1" ]
+    do
+        #give time for create_ap to setup the hotspot
+        sleep 0.5
+
+        #if the hotspot was started successfully there will be a line with AP-ENABLED
+        local START_SUCCESS=$(cat $TMP_OUTPUT_CREATE_AP | grep -q AP-ENABLED; echo $?)
+        if [ "$START_SUCCESS" = "0" ]
+        then
+            #if a line was found... can stop the checking loop
+            STOP="0"
+        else
+            #if a line was not found... check if an error occurred
+            local ERROR=$(cat $TMP_OUTPUT_CREATE_AP | grep ERROR)
+
+            #if an error occurred the string will not be empty
+            if [ ! -z "$ERROR" ]
+            then
+                #stop the loop
+                STOP="0"
+                errorMessage "Unable to start hotspot.\n\n$ERROR"
+            fi
+            #if no error occurred but not started hotspot yet wait again 0.5s
+        fi
+    done
+    echo $START_SUCCESS > $TMP_RESULT_CREATE_AP
+}
+
+function checkIfHotspotStarted
+{
+    $(loopCheckOutputCreateAP) | zenity --progress --pulsate --auto-close --text="Starting hotspot..."
+    echo $(cat $TMP_RESULT_CREATE_AP)
+}
 
 function start_hotspot
 {
@@ -45,29 +98,73 @@ function start_hotspot
     SSID=$3
     PASSWORD=$4
 
-	create_ap $WIFI_INTERFACE $INTERNET_NETWORK_INTERFACE $SSID $PASSWORD &> /tmp/log_create_ap
+	create_ap $WIFI_INTERFACE $INTERNET_NETWORK_INTERFACE $SSID $PASSWORD &> $TMP_OUTPUT_CREATE_AP &
 
-	if [ "$(check_hotspot_status 10 "Starting")" = "on" ]
+	if [ $(checkIfHotspotStarted) = "0" ]
 	then
         #if the hotspot was successfully started
         zenity --info --no-wrap --title="Hotspot Started" --text="Hotspot Started\n\nConnection Info:\n\nSSID: $SSID\n\nPassword: $PASSWORD"
-    else
-        #if there was a problem to start the hotspot
-        ERROR_MSG=$(cat /tmp/log_create_ap | grep ERROR)
-        errorMessage "Unable to start hotspot.\n\n$ERROR_MSG"
 	fi
 }
 
 function stop_hotspot
 {
-    create_ap --stop ap0
+    create_ap --stop ap0 | zenity --progress --pulsate --auto-close --text="Stopping hotspot..."
 
-    if [ "$(check_hotspot_status 5 "Stopping")" = "off" ]
+    if [ $(isHotspotRunning) = "1" ]
     then
         zenity --info --title="Hotspot Stopped" --text="Hotspot stopped successfully"
     else
         #if there was a problem to start the hotspot
         zenity --error --title="Hotspot Stop Error" --text="Error! Unable to stop hotspot."
+    fi
+}
+
+function checkDependencies
+{
+    if ! type zenity > /dev/null
+    then
+        echo "Missing dependency 'Zenity'. Please install it before using this script.
+                \n\nFor Ubuntu: sudo apt install zenity
+                \n\nFor Fedora: sudo dnf install zenity";
+        exit 1
+    fi
+
+    if ! type create_ap > /dev/null
+    then
+        errorMessage "Missing Dependency 'create_ap'. Please install it before using this app.
+        \n\nSearch for create_ap on the repositories of your distro or install directly from github.
+        \n\nMore info at https://github.com/oblique/create_ap"
+        exit 1
+    fi
+
+    if ! type ip > /dev/null
+    then
+        errorMessageDependency "ip" "iproute2"
+        exit 1
+    fi
+
+    if ! type iw > /dev/null
+    then
+        errorMessageDependency "iw" "iw"
+    fi
+
+    if ! type hostapd > /dev/null
+    then
+        errorMessageDependency "hostapd" "hostapd"
+        exit 1
+    fi
+
+    if ! type dnsmasq > /dev/null
+    then
+        errorMessageDependency "dnsmasq" "dnsmasq"
+        exit 1
+    fi
+
+    if ! type iptables > /dev/null
+    then
+        errorMessageDependency "iptables" "iptables"
+        exit 1
     fi
 }
 
@@ -80,14 +177,6 @@ function checkSupportAPMode
         errorMessage "Your wifi board does not support AP mode.\nIt cannot be used to create wifi hotspots."
         exit 1
     fi
-}
-
-
-
-function errorMessage
-{
-    MESSAGE=$1
-    zenity --error --title="Error" --no-wrap --text="$1"
 }
 
 function checkConfigFileEmpty
@@ -106,24 +195,21 @@ function checkConfigFileEmpty
 
 function windowMain
 {
-    #test if hotspot is running
-    HOTSPOT_STATUS="$(check_hotspot_status 0 "Nothing")"
-
-    if [ "$HOTSPOT_STATUS" = "on" ]
+    if [ $(isHotspotRunning) = "0" ]
     then
         MSG="Status: Hotspot running"
-        OPTIONS=("TRUE" "Stop wifi hotspot")
+        OPTIONS=("TRUE" "Stop")
     else
-        MSG="Status: Hotspot stopped"
-        OPTIONS=("TRUE" "Start wifi hotspot")
-        OPTIONS+=("FALSE" "Change settings")
+        MSG="Status: Hotspot not running"
+        OPTIONS=("TRUE" "Start")
+        OPTIONS+=("FALSE" "Settings")
     fi
 
     #if hotspot running show only option stop
     #otherwise show option start and change settings
     ACTION_SELECTED=$(zenity --list --radiolist --title="ezWiFiHotspot" \
-                        --text="$MSG\nWhat would you like to do?\n" \
-                        --column='' --column="Actions" \
+                        --text="$MSG\n\nWhat would you like to do?\n" \
+                        --column='' --column="Actions for WiFi Hotspot" \
                         --width=500 --height=300 \
                         "${OPTIONS[@]}")
     echo $ACTION_SELECTED
@@ -135,7 +221,7 @@ function runAction
     CONFIG_FILE=$2
 
     case $ACTION_SELECTED in
-        "Start wifi hotspot" )
+        "Start" )
             #Load settings from config file
             INTERNET_NETWORK_INTERFACE=$(sed -n 1p $CONFIG_FILE)
             WIFI_INTERFACE=$(sed -n 2p $CONFIG_FILE)
@@ -145,19 +231,34 @@ function runAction
             start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
         ;;
 
-        "Stop wifi hotspot" )
+        "Stop" )
             stop_hotspot
         ;;
 
-        "Change settings")
+        "Settings")
             $(sudo /opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
         ;;
 
     esac
 }
 
-
+clearTMPFiles
+checkDependencies
 checkSupportAPMode
 checkConfigFileEmpty $CONFIG_FILE
-ACTION_SELECTED=$(windowMain)
-runAction $ACTION_SELECTED $CONFIG_FILE
+
+LOOP="0"
+while [ $LOOP = "0" ]
+do
+    ACTION_SELECTED=$(windowMain)
+    errorMessage $ACTION_SELECTED
+    runAction $ACTION_SELECTED $CONFIG_FILE
+
+    #if the action is settings go back to main window after settings adjusted
+    if [ "$ACTION_SELECTED" != "Settings" ]
+    then
+        LOOP="1"
+    fi
+done
+
+clearTMPFiles
