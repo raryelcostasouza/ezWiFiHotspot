@@ -88,39 +88,70 @@ function errorMessage
     zenity --error --title="Error" --no-wrap --text="$1"
 }
 
+function checkConfigFileEmpty
+{
+    CONFIG_FILE=$1
 
-checkSupportAPMode
-#if no configuration file exists
-if [ -f $CONFIG_FILE ]
-then
-    #Load settings from config file
-    INTERNET_NETWORK_INTERFACE=$(sed -n 1p $CONFIG_FILE)
-    WIFI_INTERFACE=$(sed -n 2p $CONFIG_FILE)
-    SSID=$(sed -n 3p $CONFIG_FILE)
-    PASSWORD=$(sed -n 4p $CONFIG_FILE)
-
-    #if the variable hotspot_network_interface is empty means that the hotspot is currently not running
-    if [ "$(check_hotspot_status 0 "Nothing")" = "off" ]
+    #if config file not exists
+    if [ ! -f $CONFIG_FILE ]
     then
-        #hotspot not running... so start it
-        start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
-    else
-        #hotspot running... ask what to do... restart or stop?
-        zenity --question --no-wrap --title="Hotspot already running" --text="The hotspot is currently running.\n\What would you like to do?" --ok-label="Restart Hotspot" --cancel-label="Stop Hotspot"
+        #run the configuration interface
+        zenity --info --title="ezWiFiHotspot - First run" \
+                            --no-wrap --text="Press OK and follow the steps to set the network interfaces, ssid and password for your wifi hotspot."
+        $(sudo /opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
+    fi
+}
 
-        #if the user selected the yes option (Restart hotspot)
-        if [ "$?" = "0" ]; then
-            create_ap --stop ap0
-            start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
-        else
-            #just stop it
-            stop_hotspot
-        fi
+function windowMain
+{
+    #test if hotspot is running
+    HOTSPOT_STATUS="$(check_hotspot_status 0 "Nothing")"
+
+    if [ "$HOTSPOT_STATUS" = "on" ]
+    then
+        MSG="Status: Hotspot stopped"
+        OPTIONS="TRUE" "Stop wifi hotspot"
+    else
+        MSG="Status: Hotspot running"
+        OPTIONS=("TRUE" "Start wifi hotspot")
+        #OPTION2="FALSE" "Change settings"
     fi
 
-else
-    #run the configuration interface
-    zenity --info --title="ezWiFiHotspot - First run" \
-                        --no-wrap --text="Press OK and follow the steps to set the network interfaces, ssid and password for your wifi hotspot."
-    $(sudo /opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
-fi
+    #if hotspot running show only option stop
+    #otherwise show option start and change settings
+    ACTION_SELECTED=$(zenity --list --radiolist --title="ezWiFiHotspot" \
+                        --text="$MSG\nWhat would you like to do?\n" \
+                        --column='' --column="Actions" \
+                        --width=500 --height=300 \
+                        $OPTIONS)
+    echo $ACTION_SELECTED
+}
+
+function runAction
+{
+    ACTION_SELECTED=$1
+    CONFIG_FILE=$2
+
+    if [ $ACTION_SELECTED = "Start wifi hotspot" ]
+    then
+        #Load settings from config file
+        INTERNET_NETWORK_INTERFACE=$(sed -n 1p $CONFIG_FILE)
+        WIFI_INTERFACE=$(sed -n 2p $CONFIG_FILE)
+        SSID=$(sed -n 3p $CONFIG_FILE)
+        PASSWORD=$(sed -n 4p $CONFIG_FILE)
+
+        start_hotspot $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD
+    elif [ $ACTION_SELECTED = "Stop wifi hotspot" ]
+    then
+        stop_hotspot
+    elif [ $ACTION_SELECTED = "Change settings" ]
+    then
+        $(sudo /opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
+    fi
+}
+
+
+checkSupportAPMode
+checkConfigFileEmpty $CONFIG_FILE
+ACTION_SELECTED=$(windowMain)
+runAction $ACTION_SELECTED $CONFIG_FILE
