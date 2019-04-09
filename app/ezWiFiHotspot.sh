@@ -68,6 +68,17 @@ function stop_hotspot
     fi
 }
 
+function checkSupportAPMode
+{
+    #check if wifi board supports AP (access point mode)
+    SUPPORT_AP_MODE=$(iw list | grep -q AP)
+    if [ $SUPPORT_AP_MODE ]
+    then
+        errorMessage "Your wifi board does not support AP mode.\nIt cannot be used to create wifi hotspots."
+        exit 1
+    fi
+}
+
 function errorMessage
 {
     MESSAGE=$1
@@ -79,7 +90,8 @@ WIFI_INTERFACE=$(sed -n 2p config.txt)
 SSID=$(sed -n 3p config.txt)
 PASSWORD=$(sed -n 4p config.txt)
 
-if [ -f "config.txt" ]
+
+checkSupportAPMode
 then
 
   #if the variable hotspot_network_interface is empty means that the hotspot is currently not running
