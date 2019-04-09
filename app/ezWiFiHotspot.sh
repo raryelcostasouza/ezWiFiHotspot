@@ -51,7 +51,8 @@ function start_hotspot
         zenity --info --no-wrap --title="Hotspot Started" --text="Hotspot Started\n\nConnection Info:\n\nSSID: $SSID\n\nPassword: $PASSWORD"
     else
         #if there was a problem to start the hotspot
-        zenity --error --title="Hotspot Error" --text="Unable to start hotspot. Please contact the admin."
+        ERROR_MSG=$(cat /tmp/log_create_ap | grep ERROR)
+        errorMessage "Unable to start hotspot.\n\n$ERROR_MSG"
 	fi
 }
 
