@@ -115,5 +115,8 @@ then
   fi
 
 else
-    errorMessage "NOT CONFIGURED"
+    #run the configuration interface
+    zenity --info --title="ezWiFiHotspot - First run" \
+                        --no-wrap --text="Press OK and follow the steps to set the network interfaces, ssid and password for your wifi hotspot."
+    $(sudo /opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
 fi
