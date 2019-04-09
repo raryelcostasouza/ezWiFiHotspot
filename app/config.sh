@@ -89,7 +89,7 @@ INTERNET_INTERFACE=$(windowSelectInternetNetworkInterface $TMP_LIST)
 WIFI_INTERFACE=$(windowSelectWiFiNetworkInterface $TMP_LIST)
 SSID=$(windowCreateSSID)
 PASSWORD=$(windowCreateWiFiPassword)
-CONFIG_FILE=$2
+CONFIG_FILE=$1
 
 #save the settings to the config file
 echo $INTERNET_INTERFACE > $CONFIG_FILE
