@@ -1,5 +1,11 @@
 TMP_LIST="/tmp/list_network_interfaces.txt"
 
+function errorMessage
+{
+    MESSAGE=$1
+    zenity --error --title="Error" --no-wrap --text="$1"
+}
+
 function clearTMPFiles
 {
     rm -rf $TMP_LIST
@@ -17,13 +23,21 @@ function windowSelectNetworkInterface
   MSG=$2
   TMP_LIST=$3
 
-  TABLE_SELECTION=$(cat $TMP_LIST)
-  INTERFACE_SELECTED=$(zenity --list --radiolist --title="$TITLE" \
-                      --text="$MSG" \
-                      --column='' --column="Network Interfaces" \
-                      --width=500 --height=400 \
-                      $TABLE_SELECTION)
-  echo $INTERFACE_SELECTED
+  #if network options were found
+  if [ -f $TMP_LIST ]
+  then
+      TABLE_SELECTION=$(cat $TMP_LIST)
+      INTERFACE_SELECTED=$(zenity --list --radiolist --title="$TITLE" \
+                          --text="$MSG" \
+                          --column='' --column="Network Interfaces" \
+                          --width=500 --height=400 \
+                          $TABLE_SELECTION)
+      echo $INTERFACE_SELECTED
+  else
+      errorMessage "No $TITLE found."
+      echo ""
+  fi
+
 }
 
 function windowSelectInternetNetworkInterface
@@ -91,15 +105,21 @@ function windowCreateWiFiPassword
 
 clearTMPFiles
 INTERNET_INTERFACE=$(windowSelectInternetNetworkInterface $TMP_LIST)
+
 clearTMPFiles
 WIFI_INTERFACE=$(windowSelectWiFiNetworkInterface $TMP_LIST)
 SSID=$(windowCreateSSID)
 PASSWORD=$(windowCreateWiFiPassword)
 CONFIG_FILE=$1
 
-#save the settings to the config file
-echo $INTERNET_INTERFACE > $CONFIG_FILE
-echo $WIFI_INTERFACE >> $CONFIG_FILE
-echo $SSID >> $CONFIG_FILE
-echo $PASSWORD >> $CONFIG_FILE
+if [ ! -z "$INTERNET_INTERFACE" ] && [ ! -z "$WIFI_INTERFACE" ]
+then
+    #save the settings to the config file
+    echo $INTERNET_INTERFACE > $CONFIG_FILE
+    echo $WIFI_INTERFACE >> $CONFIG_FILE
+    echo $SSID >> $CONFIG_FILE
+    echo $PASSWORD >> $CONFIG_FILE
+else
+    errorMessage "Cannot save settings.\nMissing network interface.\nMake sure you have a network interface connected to the internet and a wifi network interface and then try to adjust the settings again."
+fi
 clearTMPFiles
