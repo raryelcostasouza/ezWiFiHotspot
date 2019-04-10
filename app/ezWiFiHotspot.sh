@@ -122,7 +122,7 @@ function stop_hotspot
         zenity --info --title="Hotspot Stopped" --no-wrap --text="Hotspot stopped successfully"
     else
         #if there was a problem to start the hotspot
-        zenity --error --title="Hotspot Stop Error" --no-wrap --text="Error! Unable to stop hotspot."
+        errorMessage "Error! Unable to stop hotspot."
     fi
 }
 
