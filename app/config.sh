@@ -91,6 +91,7 @@ function windowCreateWiFiPassword
 
 clearTMPFiles
 INTERNET_INTERFACE=$(windowSelectInternetNetworkInterface $TMP_LIST)
+clearTMPFiles
 WIFI_INTERFACE=$(windowSelectWiFiNetworkInterface $TMP_LIST)
 SSID=$(windowCreateSSID)
 PASSWORD=$(windowCreateWiFiPassword)
