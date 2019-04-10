@@ -261,8 +261,8 @@ LOOP="0"
 while [ $LOOP = "0" ]
 do
     ACTION_SELECTED=$(windowMain)
-    errorMessage $ACTION_SELECTED
     runAction $ACTION_SELECTED $CONFIG_FILE
+    #for stop/start hotspot the default action is to end the loop and finish the app
 
     #if the action is settings go back to main window after settings adjusted
     if [ "$ACTION_SELECTED" != "Settings" ]
