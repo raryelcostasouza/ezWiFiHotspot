@@ -1,4 +1,4 @@
- ezWiFiHotspot
+# ezWiFiHotspot
 Simple and easy GUI for creating wifi hotspots on Linux using create_ap (https://github.com/oblique/create_ap) behind the scenes.
 
 # New version 2.0 - 10/04/2019
