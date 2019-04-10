@@ -16,6 +16,8 @@
 #along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #ezWiFiHotspot - https://github.com/raryelcostasouza/ezWiFiHotspot
+#This util-root.sh script contains the commands used by the ezWiFiHotspot.sh
+#that need to be run as root user
 
 ACTION=$1
 case $ACTION in
