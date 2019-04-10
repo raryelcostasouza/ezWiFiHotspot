@@ -1,3 +1,0 @@
-Show list of network interfaces available as source
-Ask user for password
-Networkname as ssid

@@ -14,14 +14,15 @@
 #step 2
 #edit the shortcut/hotspot-gui.sh with the correct wifi interface
 
-LINE_SUDOERS="ALL ALL=NOPASSWD: /opt/ezWiFiHotspot/ezWiFiHotspot.sh"
+LINE_SUDOERS="ALL ALL=NOPASSWD: /opt/ezWiFiHotspot/util-root.sh"
 
-cp -r app /opt/ezWiFiHotspot
+mkdir -p /opt/ezWiFiHotspot
+cp -r app/* /opt/ezWiFiHotspot
 cp shortcut/ezwifihotspot.desktop /usr/share/applications/
 
 LINE_SUDOERS_EXISTS=$(cat /etc/sudoers | grep -q "$LINE_SUDOERS"; echo $?)
 
-if [ $LINE_SUDOERS_EXISTS ]
+if [ "$LINE_SUDOERS_EXISTS" = "1" ]
 then
     echo $LINE_SUDOERS >> /etc/sudoers
 fi
