@@ -29,7 +29,9 @@ $ iw list | grep AP
 Some proprietary wifi drivers do not support AP-mode (even when the wifi board actually supports it). In such case this app would not work.
 
 # Installation instructions
-sudo ./install.sh
+1. Download the release package at https://github.com/raryelcostasouza/ezWiFiHotspot/releases/
+2. Extract it
+3. sudo ./install.sh
 
 Note: to enable non-admin users to create the wifi hotspot, by default, during the installation a rule is added to the /etc/sudoers file. This rule allow all users to execute the script /opt/ezWiFiHotspot/util-root.sh (where the root commands needed for managing the wifi hotspot are located).
 
