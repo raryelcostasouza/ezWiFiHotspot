@@ -95,11 +95,6 @@ WIFI_INTERFACE=$(windowSelectWiFiNetworkInterface $TMP_LIST)
 SSID=$(windowCreateSSID)
 PASSWORD=$(windowCreateWiFiPassword)
 CONFIG_FILE=$1
-CONFIG_FOLDER=$2
-
-
-#create the config folder for the user if necessary
-mkdir -p $CONFIG_FOLDER
 
 #save the settings to the config file
 echo $INTERNET_INTERFACE > $CONFIG_FILE
