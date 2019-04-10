@@ -14,7 +14,7 @@
 #step 2
 #edit the shortcut/hotspot-gui.sh with the correct wifi interface
 
-LINE_SUDOERS="ALL ALL=NOPASSWD: /opt/ezWiFiHotspot/ezWiFiHotspot.sh"
+LINE_SUDOERS="ALL ALL=NOPASSWD: /opt/ezWiFiHotspot/util-root.sh"
 
 mkdir -p /opt/ezWiFiHotspot
 cp -r app/* /opt/ezWiFiHotspot
