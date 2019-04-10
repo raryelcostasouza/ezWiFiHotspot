@@ -1,21 +1,24 @@
  ezWiFiHotspot
-Simple and easy GUI for creating wifi hotspots on Linux using create_ap (https://github.com/oblique/create_ap)
+Simple and easy GUI for creating wifi hotspots on Linux using create_ap (https://github.com/oblique/create_ap) behind the scenes.
 
-# Coming soon
-1. Configuration entirely via GUI
-2. More detailed error messages
+# New version 10/04/2019
+1. Configuration available entirely via GUI
+2. Preliminary tests for dependencies and wifi board support
+3. More detailed error messages
 
 # Requirements
-1. create_ap (Download and install from https://github.com/oblique/create_ap)
+1. create_ap. Download and install from https://github.com/oblique/create_ap or from the deps subfolder on this repository.
 2. dnsmasq
 3. hostapd
-4. net-tools (ifconfig)
+4. iptables
+5. ip
+6. iw
 
 on Ubuntu
-sudo apt install dnsmasq hostapd net-tools
+sudo apt install dnsmasq hostapd iproute2 iw iptables
 
 # About WiFi boards using proprietary drivers
-It does not work. You need to use opensource drivers to be able to use the app.
+It has more chance to work with opensource drivers.
 
 # Hardware support
 WiFi board need to support AP-mode.
@@ -26,27 +29,24 @@ $ iw list | grep AP
 # Installation instructions
 sudo ./install.sh
 
-Note: to enable non-admin users to create the wifi hotspot, by default, during the installation a rule is added to the /etc/sudoers file. This rule allow all users to execute the script ezWiFiHotspot.sh (where the root commands needed for managing the wifi hotspot are located).
+Note: to enable non-admin users to create the wifi hotspot, by default, during the installation a rule is added to the /etc/sudoers file. This rule allow all users to execute the script /opt/ezWiFiHotspot/util-root.sh (where the root commands needed for managing the wifi hotspot are located).
 
-# Configuration
+# Screenshots
 
-Before being used it is necessary to adjust a few settings. For now, editing manually the file /opt/ezWiFiHotspot/ezWiFiHotspot.sh
+# Main Window (Hotspot not running)
+![ss0](screenshots/shot0.png?raw=true "Main Window")
 
-## WIFI_INTERFACE=wlp2s0
-Replace wlp2s0 with the desired wifi network interface to transmit the hotspot signal.
-Check the ones available using the following command on terminal:
+# Main Window (Hotspot running)
+![ss1](screenshots/shot1.png?raw=true "Main Window")
 
-$ ifconfig
+# WiFi Hotspot created
+![ss2](screenshots/shot2.png?raw=true "Hotspot Created")
 
-## INTERNET_NETWORK_INTERFACE=enp3s0
-Network interface that is connected to the internet. Usually enp3s0 for land connections and wlp2s0 for wifi boards.
-NOTE: It can be the set the same as the WIFI_INTERFACE in case you want to share your wifi connection with a different ssid and password (only if 2.4Ghz wifi connection. It does not usually work for 5Ghz connections).
-Check yours settings at:
-
-$ ifconfig
-
-## PASSWORD
-The default is set to "ezHotspot"
+# Settings GUI
+![ss3](screenshots/shot4.png?raw=true "Settings")
+![ss4](screenshots/shot5.png?raw=true "Settings")
+![ss5](screenshots/shot6.png?raw=true "Settings")
+![ss6](screenshots/shot7.png?raw=true "Settings")
 
 ## License
 
