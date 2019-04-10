@@ -195,7 +195,9 @@ function checkConfigFileEmpty
         #run the configuration interface
         zenity --info --title="ezWiFiHotspot - First run" \
                             --no-wrap --text="Press OK and follow the steps to set the network interfaces, ssid and password for your wifi hotspot."
-        $(/opt/ezWiFiHotspot/config.sh $CONFIG_FILE $CONFIG_FOLDER)
+        #create config folder and run configuration GUI
+        mkdir -p $CONFIG_FOLDER
+        $(/opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
     fi
 }
 
