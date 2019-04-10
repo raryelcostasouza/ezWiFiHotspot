@@ -119,10 +119,10 @@ function stop_hotspot
     #if the something was returned it means the hotspot still running
     if [ -z "$(getCurrentHotspotRunning)" ]
     then
-        zenity --info --title="Hotspot Stopped" --text="Hotspot stopped successfully"
+        zenity --info --title="Hotspot Stopped" --no-wrap --text="Hotspot stopped successfully"
     else
         #if there was a problem to start the hotspot
-        zenity --error --title="Hotspot Stop Error" --text="Error! Unable to stop hotspot."
+        zenity --error --title="Hotspot Stop Error" --no-wrap --text="Error! Unable to stop hotspot."
     fi
 }
 
