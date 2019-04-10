@@ -16,7 +16,8 @@ https://github.com/raryelcostasouza/ezWiFiHotspot/releases/tag/v2.0
 6. iw
 
 on Ubuntu
-sudo apt install dnsmasq hostapd iproute2 iw iptables
+
+$ sudo apt install dnsmasq hostapd iproute2 iw iptables
 
 # Hardware support
 WiFi board need to support AP-mode (access-point mode), essential to be able to create wifi hotspots.
