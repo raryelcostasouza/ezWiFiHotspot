@@ -17,14 +17,14 @@ Simple and easy GUI for creating wifi hotspots on Linux using create_ap (https:/
 on Ubuntu
 sudo apt install dnsmasq hostapd iproute2 iw iptables
 
-# About WiFi boards using proprietary drivers
-It has more chance to work with opensource drivers.
-
 # Hardware support
-WiFi board need to support AP-mode.
+WiFi board need to support AP-mode (access-point mode), essential to be able to create wifi hotspots.
 Check running the following command on terminal:
 
 $ iw list | grep AP
+
+# About WiFi boards using proprietary drivers
+Some proprietary wifi drivers do not support AP-mode (even when the wifi board actually supports it). In such case this app would not work.
 
 # Installation instructions
 sudo ./install.sh
