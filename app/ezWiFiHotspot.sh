@@ -248,7 +248,7 @@ function runAction
         ;;
 
         "Settings")
-            $(/opt/ezWiFiHotspot/config.sh $CONFIG_FILE $CONFIG_FOLDER)
+            $(/opt/ezWiFiHotspot/config.sh $CONFIG_FILE)
         ;;
 
     esac
