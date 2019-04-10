@@ -41,8 +41,8 @@ function errorMessageDependency
 function clearTMPFiles
 {
     rm -rf $TMP_STATUS_HOTSPOT
-    rm -rf $TMP_OUTPUT_CREATE_AP
     rm -rf $TMP_RESULT_CREATE_AP
+    $(sudo /opt/ezWiFiHotspot/util-root.sh "removeRootTMPFiles" $TMP_OUTPUT_CREATE_AP)
 }
 
 function getCurrentHotspotRunning
@@ -102,7 +102,7 @@ function start_hotspot
     SSID=$3
     PASSWORD=$4
 
-	create_ap $WIFI_INTERFACE $INTERNET_NETWORK_INTERFACE $SSID $PASSWORD &> $TMP_OUTPUT_CREATE_AP &
+    $(sudo /opt/ezWiFiHotspot/util-root.sh "start_hotspot" $INTERNET_NETWORK_INTERFACE $WIFI_INTERFACE $SSID $PASSWORD $TMP_OUTPUT_CREATE_AP)
 
 	if [ $(checkIfHotspotStarted) = "0" ]
 	then
@@ -114,7 +114,7 @@ function start_hotspot
 function stop_hotspot
 {
     RUNNING_AP=$1
-    create_ap --stop $RUNNING_AP | zenity --progress --pulsate --auto-close --text="Stopping hotspot..."
+    $(sudo /opt/ezWiFiHotspot/util-root.sh "stop_hotspot" $RUNNING_AP) | zenity --progress --pulsate --auto-close --text="Stopping hotspot..."
 
     #if the something was returned it means the hotspot still running
     if [ -z "$(getCurrentHotspotRunning)" ]
