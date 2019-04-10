@@ -45,9 +45,12 @@ function clearTMPFiles
     rm -rf $TMP_RESULT_CREATE_AP
 }
 
-function isHotspotRunning
+function getCurrentHotspotRunning
 {
-    $(create_ap --list-running | grep -q "(ap"; echo $? > $TMP_STATUS_HOTSPOT) | zenity --progress --pulsate --auto-close --text="Checking hotspot status..."
+    #if there is a running hotspot there will an output string containing on the format (ap1)
+    #saves the interface name to $TMP_STATUS_HOTSPOT
+    #will be used when stopping the hotspot
+    $(create_ap --list-running | grep -oP '\(\K[^\)]+' > $TMP_STATUS_HOTSPOT) | zenity --progress --pulsate --auto-close --text="Checking hotspot status..."
     echo $(cat $TMP_STATUS_HOTSPOT)
 }
 
@@ -110,9 +113,11 @@ function start_hotspot
 
 function stop_hotspot
 {
-    create_ap --stop ap0 | zenity --progress --pulsate --auto-close --text="Stopping hotspot..."
+    RUNNING_AP=$1
+    create_ap --stop $RUNNING_AP | zenity --progress --pulsate --auto-close --text="Stopping hotspot..."
 
-    if [ $(isHotspotRunning) = "1" ]
+    #if the something was returned it means the hotspot still running
+    if [ -z "$(getCurrentHotspotRunning)" ]
     then
         zenity --info --title="Hotspot Stopped" --text="Hotspot stopped successfully"
     else
@@ -196,7 +201,10 @@ function checkConfigFileEmpty
 
 function windowMain
 {
-    if [ $(isHotspotRunning) = "0" ]
+    CURRENT_AP=$(getCurrentHotspotRunning)
+
+    #if CURRENT_AP not empty means hotspot is running
+    if [ ! -z "$CURRENT_AP" ]
     then
         MSG="Status: Hotspot running"
         OPTIONS=("TRUE" "Stop")
@@ -233,7 +241,8 @@ function runAction
         ;;
 
         "Stop" )
-            stop_hotspot
+            CURRENT_AP=$(cat $TMP_STATUS_HOTSPOT)
+            stop_hotspot $CURRENT_AP
         ;;
 
         "Settings")
